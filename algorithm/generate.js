@@ -10,7 +10,7 @@ export async function generatePasswords(userData) {
   const hasSpecial = (pw) => [...pw].some(c => specials.includes(c));
   const isValidLength = (pw) => pw.length >= 7 && pw.length <= 10;
 
-  // 사용자 정보 기반 단어 & 숫자
+  // userData 기반
   const baseWords = [];
   if (userData.includeName) {
     baseWords.push(userData.firstName.toLowerCase(), userData.lastName.toLowerCase());
@@ -30,17 +30,14 @@ export async function generatePasswords(userData) {
   const userSet = new Set();
   const mixSet = new Set();
 
-  // --- userData 전용 ---
+  // userData 전용
   baseWords.forEach(word => {
     numbers.forEach(num => {
       specials.split('').forEach(s => {
-        const candidates = [
-          `${word}${num}${s}`,
-          `${s}${word}${num}`,
-          `${word}${s}${num}`,
-          `${num}${word}${s}`
+        const patterns = [
+          `${word}${num}${s}`, `${s}${word}${num}`, `${word}${s}${num}`, `${num}${word}${s}`
         ];
-        candidates.forEach(pw => {
+        patterns.forEach(pw => {
           if (isValidLength(pw) && hasSpecial(pw)) {
             userSet.add(pw);
             mixSet.add(pw);
@@ -50,11 +47,11 @@ export async function generatePasswords(userData) {
     });
   });
 
-  // --- nord 데이터 전용 ---
+  // nord 데이터 전용
   letters.forEach(word => {
     specials.split('').forEach(s => {
-      const candidates = [`${word}${s}`, `${s}${word}`];
-      candidates.forEach(pw => {
+      const patterns = [`${word}${s}`, `${s}${word}`];
+      patterns.forEach(pw => {
         if (isValidLength(pw) && hasSpecial(pw)) {
           nordSet.add(pw);
           mixSet.add(pw);
@@ -80,7 +77,7 @@ export async function generatePasswords(userData) {
     });
   });
 
-  // 하나의 TXT 내용으로 합치기
+  // txt 내용으로 합치기
   let txtContent = "";
   txtContent += "=== [NORD-ONLY] ===\n";
   txtContent += Array.from(nordSet).join("\n") + "\n\n";
