@@ -69,54 +69,53 @@
 </head>
 <body>
 
-  <h1>user_info.json 불러오기</h1>
+  <h1>user_info.json 업로드</h1>
   <input type="file" id="fileInput" accept=".json">
   <button onclick="loadUserInfo()">비밀번호 생성</button>
 
   <div id="result"></div>
 
-<script type="module">
-  import { generatePasswords } from './algorithm/generate.js';
-  import mixed from './pwdb/nord_mixed.json' assert { type: "json" };
-  import letters from './pwdb/nord_letters.json' assert { type: "json" };
-  import numeric from './pwdb/nord_numeric.json' assert { type: "json" };
+  <script type="module">
+    import { generatePasswords } from './algorithm/generate.js';
 
-  const commonList = [...new Set([...mixed, ...letters, ...numeric])];
+    function loadUserInfo() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) {
+        alert("user_info.json 파일을 선택하세요.");
+        return;
+      }
 
-  function loadUserInfo() {
-    const file = document.getElementById("fileInput").files[0];
-    if (!file) {
-      alert("user_info.json 파일을 선택하세요.");
-      return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const info = JSON.parse(e.target.result);
+          const passwords = generatePasswords(info);
+          displayPasswords(passwords);
+        } catch (err) {
+          alert("JSON 파일 형식이 올바르지 않습니다.");
+        }
+      };
+      reader.readAsText(file);
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const info = JSON.parse(e.target.result);
-      const passwords = generatePasswords(info, commonList);
-      displayPasswords(passwords);
-    };
-    reader.readAsText(file);
-  }
+    function displayPasswords(passwords) {
+      const resultEl = document.getElementById("result");
+      resultEl.innerHTML =
+        `✅ 총 ${passwords.length}개의 비밀번호가 생성되었습니다.\n\n샘플:\n` +
+        passwords.slice(0, 10).join('\n');
 
-  function displayPasswords(passwords) {
-    const resultEl = document.getElementById("result");
-    resultEl.innerHTML =
-      `✅ 총 ${passwords.length}개의 비밀번호가 생성되었습니다.\n\n샘플:\n` +
-      passwords.slice(0, 10).join('\n');
+      const blob = new Blob([passwords.join('\n')], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'generated_passwords.txt';
+      a.textContent = '👉 예상 비밀번호 파일 다운로드';
+      a.className = 'download-link';
+      resultEl.appendChild(document.createElement('br'));
+      resultEl.appendChild(a);
+    }
 
-    const blob = new Blob([passwords.join('\n')], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'generated_passwords.txt';
-    a.textContent = '👉 예상 비밀번호 파일 다운로드';
-    a.className = 'download-link';
-    resultEl.appendChild(document.createElement('br'));
-    resultEl.appendChild(a);
-  }
-
-  window.loadUserInfo = loadUserInfo;
-</script>
+    window.loadUserInfo = loadUserInfo;
+  </script>
 
 </body>
 </html>
