@@ -14,7 +14,8 @@ function generateFromUserInfo(info) {
   const baseWords = [];
 
   // 닉네임, 반려동물 이름
-  if (info.options.useNick && info.nickname) baseWords.push(info.nickname.toLowerCase());
+  if (info.options.useNick && info.nickname)
+    baseWords.push(info.nickname.toLowerCase());
   if (info.options.usePet && info.petNames?.length)
     baseWords.push(...info.petNames.map((p) => p.toLowerCase()));
 
@@ -74,7 +75,14 @@ function generateFromUserInfo(info) {
     }
   }
 
-  console.log("[DEBUG] user baseWords:", baseWords, "numberParts:", numberParts, "count:", results.size);
+  console.log(
+    '[DEBUG] user baseWords:',
+    baseWords,
+    'numberParts:',
+    numberParts,
+    'count:',
+    results.size
+  );
 
   return {
     pw: Array.from(results),
@@ -106,7 +114,7 @@ function generateFromNordWords(nordWords = [], numberParts = []) {
     }
   }
 
-  console.log("[DEBUG] nordWords count:", results.size);
+  console.log('[DEBUG] nordWords count:', results.size);
   return Array.from(results);
 }
 
@@ -134,19 +142,22 @@ function generateMixPasswords(userWords, nordNumWords = [], max = 500) {
     }
   }
 
-  console.log("[DEBUG] mix count:", mixResults.size);
+  console.log('[DEBUG] mix count:', mixResults.size);
   return Array.from(mixResults);
 }
 
 /** 최종 함수 */
-export function generatePasswords(info, nordData = { nordWord: [], nordNum: [] }) {
+export function generatePasswords(
+  info,
+  nordData = { nordWord: [], nordNum: [] }
+) {
   const { nordWord, nordNum } = nordData;
 
   // 1️⃣ User 기반
   const { pw: userPw, numberParts } = generateFromUserInfo(info);
 
   // 2️⃣ Nord 기반 (letters + mixed)
-  const nordPw = generateFromNordWords(nordWord, numberParts);
+  const nordPw = generateFromNordWords(nordWord, nordNum);
 
   // 3️⃣ Mix (userWords + nordNum)
   const mixPw = generateMixPasswords(userPw, nordNum, 500);
