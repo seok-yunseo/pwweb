@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <input id="favNums" type="text" placeholder="쉼표로 구분 (예: 77, 14, 99)" />
 
     <button id="generate">비밀번호 생성</button>
+    <button id="endpage">내가 생각했던 비밀번호는 안전할까?</button>
   `;
 
   // 결과 박스
@@ -135,6 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 비밀번호 생성
   document.getElementById('generate').addEventListener('click', async () => {
     const birth = document.getElementById('birth').value.split('-');
+
+    document.getElementById('endpage').addEventListener('click', function () {
+      window.location.href = 'end.html'; // 이동할 HTML 파일명으로 바꾸세요
+    });
 
     // 사용자 데이터 수집
     const userData = {
@@ -197,7 +202,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     ].join('\n');
 
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([allContent], { type: 'text/plain' }));
+    a.href = URL.createObjectURL(
+      new Blob([allContent], { type: 'text/plain' })
+    );
     a.download = 'password_dataset.txt';
     a.textContent = '👉 전체 비밀번호 데이터셋 다운로드';
     a.className = 'download-link';

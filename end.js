@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   container.className = 'container';
   container.innerHTML = `
     <h2>비밀번호 강도 체크</h2>
-    <input type="password" id="pwInput" placeholder="비밀번호를 입력하세요" autocomplete="off" />
+    <input type="password" id="pwInput" placeholder="생각한 비밀번호를 입력하세요" autocomplete="off" />
     <p id="pwStrength" style="white-space: pre-line;"></p>
   `;
   document.body.appendChild(container);
