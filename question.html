@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예상 비밀번호 생성기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px 25px;
+      border-radius: 12px;
+      animation: fadeIn 0.8s ease-in;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #intro {
+      background: rgba(255,255,255,0.08);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 0.95rem;
+    }
+
+    input, select, button {
+      margin-top: 5px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input, select {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    select {
+      background: rgba(255,255,255,0.15);
+    }
+
+    .inline-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      background: #ff9800;
+      color: #fff;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #ffb74d;
+    }
+
+    .hidden { display: none; }
+
+    #resultBox {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+
+    a.download-link {
+      display: inline-block;
+      margin-top: 10px;
+      background: #ff9800;
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a.download-link:hover {
+      background: #ffb74d;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>예상 비밀번호 생성기</h1>
+
+  <div id="intro">
+    <strong>당신의 비밀번호를 맞혀보겠습니다.</strong><br><br>
+    <u>예상 비밀번호 생성 규칙</u>:<br>
+    - 소문자만 사용 (7~10자)<br>
+    - 특수문자 반드시 포함 (!@#$%^&*)<br>
+    - 이름/생일/닉네임/전화번호 등의 정보를 조합하여 생성됩니다.
+  </div>
+
+  <!-- Step 1 -->
+  <div id="step1">
+    <label>이름 (예: Min)</label>
+    <input type="text" id="firstName" placeholder="First name">
+
+    <label>성 (예: Kim)</label>
+    <input type="text" id="lastName" placeholder="Last name">
+
+    <label>생년월일</label>
+    <input type="date" id="birth">
+
+    <label>전화번호</label>
+    <input type="text" id="phone" placeholder="01012345678">
+
+    <label>집전화번호</label>
+    <div class="inline-group">
+      <input type="text" id="homePhone" placeholder="집전화번호">
+      <label><input type="checkbox" id="noHomePhone"> 없음</label>
+    </div>
+
+    <button onclick="goToStep2()">다음</button>
+  </div>
+
+  <!-- Step 2 -->
+  <div id="step2" class="hidden">
+    <label>별명</label><input type="text" id="nickname">
+
+    <label>반려동물 이름들 (쉼표로 구분)</label>
+    <div class="inline-group">
+      <input type="text" id="petNames" placeholder="예: coco, milo">
+      <label><input type="checkbox" id="noPet"> 없음</label>
+    </div>
+
+    <label>자주 사용하는 숫자들 (쉼표로 구분)</label><input type="text" id="favNums">
+
+    <label>선호 특수문자들 (예: !,@,$)</label><input type="text" id="specialChars">
+
+    <label>비밀번호에 이름을 포함합니까?</label>
+    <select id="includeName"><option value="yes">예</option><option value="no">아니오</option></select>
+
+    <label>문자 치환(S → $ 등)을 사용합니까?</label>
+    <select id="useLeet"><option value="yes">예</option><option value="no">아니오</option></select>
+
+    <button onclick="generatePasswords()">비밀번호 생성 및 다운로드</button>
+  </div>
+
+  <div id="resultBox"></div>
+</div>
+
+<script>
+const leetMap = { 'a': '@', 's': '$', 'i': '1', 'o': '0', 'e': '3' };
+
+function applyLeet(word, useLeet) {
+  if (!useLeet) return word;
+  return word.split('').map(c => leetMap[c] || c).join('');
+}
+
+function isValidName(name) {
+  return /^[A-Z][a-z]+$/.test(name);
+}
+
+function goToStep2() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const birth = document.getElementById("birth").value;
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!isValidName(firstName) || !isValidName(lastName)) {
+    alert("이름과 성은 영어로 입력하고, 이니셜만 대문자로 작성해야 합니다. 예: Min, Kim");
+    return;
+  }
+  if (!birth) {
+    alert("생년월일을 입력해주세요.");
+    return;
+  }
+  if (!phone) {
+    alert("전화번호를 입력해주세요.");
+    return;
+  }
+
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+}
+
+function generatePasswords() {
+  const firstName = document.getElementById("firstName").value.trim().toLowerCase();
+  const lastName = document.getElementById("lastName").value.trim().toLowerCase();
+  const birth = document.getElementById("birth").value;
+  const phone = document.getElementById("phone").value.trim();
+  const homePhone = document.getElementById("noHomePhone").checked ? "" : document.getElementById("homePhone").value.trim();
+
+  const nickname = document.getElementById("nickname").value.trim().toLowerCase();
+  const petNames = document.getElementById("noPet").checked ? [] :
+    document.getElementById("petNames").value.split(',').map(p => p.trim().toLowerCase());
+  const favNums = document.getElementById("favNums").value.split(',').map(n => n.trim()).filter(Boolean);
+  const specialChars = document.getElementById("specialChars").value.split(',').map(s => s.trim()).filter(Boolean);
+
+  const includeName = document.getElementById("includeName").value === 'yes';
+  const useLeet = document.getElementById("useLeet").value === 'yes';
+
+  if (specialChars.length === 0) {
+    alert("최소 하나 이상의 특수문자를 입력해주세요.");
+    return;
+  }
+
+  const baseWords = [nickname, ...petNames];
+  if (includeName) baseWords.push(firstName, lastName);
+
+  const numberParts = [];
+  if (birth) {
+    const [y, m, d] = birth.split("-");
+    numberParts.push(y, m + d);
+  }
+  numberParts.push(...favNums);
+  if (phone.length >= 4) numberParts.push(phone.slice(-4));
+  if (homePhone.length >= 4) numberParts.push(homePhone.slice(-4));
+
+  const passwords = new Set();
+
+  outer: for (let word of baseWords) {
+    for (let num of numberParts) {
+      for (let s of specialChars) {
+        const combos = [
+          word + num + s,
+          s + word + num,
+          word + s + num,
+          num + word + s,
+          applyLeet(word, useLeet) + num + s,
+          applyLeet(word + num, useLeet) + s
+        ];
+        for (let pw of combos) {
+          if (pw.length >= 7 && pw.length <= 10 && /[!@#$%^&*]/.test(pw)) {
+            passwords.add(pw);
+            if (passwords.size >= 10000) break outer;
+          }
+        }
+      }
+    }
+  }
+
+  // 부족할 경우 랜덤 문자열로 채움
+  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+  const specials = "!@#$%^&*";
+  while (passwords.size < 10000) {
+    let word = "";
+    const len = 7 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < len - 1; i++) {
+      word += alphabet[Math.floor(Math.random() * alphabet.length)];
+    }
+    word += specials[Math.floor(Math.random() * specials.length)];
+    passwords.add(word);
+  }
+
+  const pwList = Array.from(passwords);
+  const resultBox = document.getElementById("resultBox");
+  resultBox.innerHTML = `✅ 10,000개의 비밀번호 생성 완료. 아래 버튼을 눌러 다운로드하세요.<br>`;
+
+  const blob = new Blob([pwList.join('\n')], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'generated_passwords.txt';
+  a.textContent = '👉 예상 비밀번호 파일 다운로드';
+  a.classList.add('download-link');
+  resultBox.appendChild(a);
+}
+</script>
+
+</body>
+</html>
