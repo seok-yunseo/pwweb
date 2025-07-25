@@ -2,7 +2,7 @@
 import { generatePasswords } from "./algorithm/generate.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 스타일 그대로
+  // 스타일
   const style = document.createElement("style");
   style.textContent = `
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
@@ -16,30 +16,31 @@ document.addEventListener("DOMContentLoaded", () => {
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      width: 520px;
+      width: 550px;
       animation: fadeIn 0.8s ease-in;
       text-align:center;
       max-height: 90vh;
       overflow-y: auto;
     }
     h2 { margin-bottom:15px; font-size:1.5rem; }
-    label { display:block; margin-top:12px; text-align:left; }
-    input, select, button {
+    label { display:flex; align-items:center; margin-top:12px; justify-content:space-between; }
+    .question { text-align:left; flex:1; font-size:1rem; }
+    input[type="checkbox"] { width:auto; }
+    input[type="text"], input[type="date"], button {
       width:100%; padding:10px; margin-top:6px; font-size:1rem;
       border:none; border-radius:6px;
     }
-    input, select {
+    input[type="text"], input[type="date"] {
       background: rgba(255,255,255,0.1);
       color:#fff;
-      text-transform: uppercase;
+      text-transform: none;   /* 대문자 변환 제거 */
     }
-    input:focus, select:focus { outline:2px solid #ff9800; }
+    input:focus { outline:2px solid #ff9800; }
     button {
       background:#ff9800; color:#fff; font-weight:bold; cursor:pointer;
       margin-top:18px; transition:background 0.3s;
     }
     button:hover { background:#ffb74d; }
-    .inline-group { display:flex; align-items:center; gap:8px; }
     .hidden { display:none; }
     #resultBox {
       margin-top:20px; text-align:left;
@@ -63,39 +64,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const step1 = document.createElement("div");
   step1.innerHTML = `
     <h2>Step 1: 기본 정보 입력</h2>
-    <label>이름</label><input id="firstName" type="text" placeholder="MIN" />
-    <label>성</label><input id="lastName" type="text" placeholder="KIM" />
-    <label>생년월일</label><input id="birth" type="date" />
-    <label>전화번호</label><input id="phone" type="text" />
-    <label>집전화번호</label>
-    <div class="inline-group">
-      <input id="homePhone" type="text" />
-      <label><input id="noHomePhone" type="checkbox" /> 없음</label>
-    </div>
+    <label><span class="question">이름/성 사용</span><input type="checkbox" id="useName" checked /></label>
+    <input id="firstName" type="text" placeholder="이름 입력 (예: Min)" />
+    <input id="lastName" type="text" placeholder="성 입력 (예: Kim)" />
+
+    <label><span class="question">이니셜 사용 (예: SY)</span><input type="checkbox" id="useInitial" /></label>
+
+    <label><span class="question">생년월일 입력</span></label>
+    <input id="birth" type="date" />
+
+    <label><span class="question">전화번호 입력</span></label>
+    <input id="phone" type="text" placeholder="01012345678" />
+
+    <label><span class="question">집전화번호</span></label>
+    <input id="homePhone" type="text" placeholder="집전화번호 (없으면 체크)" />
+    <label style="justify-content:flex-start;"><input id="noHomePhone" type="checkbox" /> 집전화 없음</label>
+
     <button id="toStep2">다음</button>
   `;
 
-  // Step2 (옵션 선택 - Nord/MIX 제외)
+  // Step2 (추가 정보)
   const step2 = document.createElement("div");
   step2.classList.add("hidden");
   step2.innerHTML = `
-    <h2>Step 2: 추가 정보 입력 & 조건 선택</h2>
-    <label>별명</label><input id="nickname" type="text" />
+    <h2>Step 2: 추가 정보 입력</h2>
 
-    <label>반려동물 이름들 (쉼표로 구분)</label>
-    <div class="inline-group">
-      <input id="petNames" type="text" />
-      <label><input id="noPet" type="checkbox" /> 없음</label>
-    </div>
+    <label><span class="question">닉네임 사용</span><input type="checkbox" id="useNick" checked /></label>
+    <input id="nickname" type="text" placeholder="닉네임 입력" />
 
-    <label>자주 사용하는 숫자들 (쉼표로 구분)</label>
-    <input id="favNums" type="text" />
+    <label><span class="question">반려동물 이름 사용</span><input type="checkbox" id="usePet" checked /></label>
+    <input id="petNames" type="text" placeholder="쉼표로 구분 (예: coco, choco)" />
 
-    <h3>비밀번호 조합 옵션</h3>
-    <label><input type="checkbox" id="useName" checked /> 이름/성 사용</label>
-    <label><input type="checkbox" id="useInitial" /> 이니셜 사용 (예: SY)</label>
-    <label><input type="checkbox" id="usePet" /> 반려동물 이름 사용</label>
-    <label><input type="checkbox" id="useNick" /> 닉네임 사용</label>
+    <label><span class="question">자주 사용하는 숫자 사용</span><input type="checkbox" id="useFavNums" checked /></label>
+    <input id="favNums" type="text" placeholder="쉼표로 구분 (예: 77, 14, 99)" />
 
     <button id="generate">비밀번호 생성</button>
   `;
@@ -123,9 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
       firstName: document.getElementById("firstName").value.trim(),
       lastName: document.getElementById("lastName").value.trim(),
       nickname: document.getElementById("nickname").value.trim(),
-      petNames: document.getElementById("noPet").checked
-        ? []
-        : document.getElementById("petNames").value.split(",").map((p) => p.trim()),
+      petNames: document.getElementById("petNames").value
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean),
       birthYear: birth[0],
       birthMonth: birth[1],
       birthDay: birth[2],
@@ -138,12 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((n) => n.trim())
         .filter(Boolean),
 
-      // 새 옵션 (Nord/MIX는 항상 true)
+      // 옵션 전달
       options: {
         useName: document.getElementById("useName").checked,
         useInitial: document.getElementById("useInitial").checked,
         usePet: document.getElementById("usePet").checked,
         useNick: document.getElementById("useNick").checked,
+        useFavNums: document.getElementById("useFavNums").checked,
       },
     };
 
@@ -160,7 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <pre>${results.mix.slice(0, 30).join("\n")}</pre>
     `;
 
-    // TXT 전체 다운로드
     const allContent = [
       "=== [USERDATA-ONLY] ===",
       ...results.user,
