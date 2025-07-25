@@ -1,11 +1,6 @@
 import { generatePasswords } from './algorithm/generate.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Nord 데이터 fetch로 로드
-  const nordLetters = await (await fetch('./pwdb/nord_letters.json')).json();
-  const nordMixed = await (await fetch('./pwdb/nord_mixed.json')).json();
-  const nordNumeric = await (await fetch('./pwdb/nord_numeric.json')).json();
-
   // 스타일 정의
   const style = document.createElement('style');
   style.textContent = `
@@ -62,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   `;
   document.head.appendChild(style);
 
+  // 컨테이너
   const container = document.createElement('div');
   container.classList.add('container');
 
@@ -107,6 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <button id="generate">비밀번호 생성</button>
   `;
 
+  // 결과 박스
   const resultBox = document.createElement('div');
   resultBox.id = 'resultBox';
 
@@ -139,6 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('generate').addEventListener('click', async () => {
     const birth = document.getElementById('birth').value.split('-');
 
+    // 사용자 데이터 수집
     const userData = {
       firstName: document.getElementById('firstName').value.trim(),
       lastName: document.getElementById('lastName').value.trim(),
@@ -173,12 +171,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     resultBox.textContent = '비밀번호 생성 중...';
 
-    const results = await generatePasswords(userData, {
-      nordWord: [...nordLetters, ...nordMixed],
-      nordNum: nordNumeric, // numeric 데이터는 여기로
-    });
+    // generate.js 내부에서 Nord 데이터까지 직접 fetch해서 처리
+    const results = await generatePasswords(userData);
 
-
+    // 결과 표시
     resultBox.innerHTML = `
       <h3>USERDATA (총 ${results.user.length}개)</h3>
       <pre>${results.user.slice(0, 30).join('\n')}</pre>
@@ -188,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <pre>${results.mix.slice(0, 30).join('\n')}</pre>
     `;
 
+    // 다운로드 링크 추가
     const allContent = [
       '=== [USERDATA-ONLY] ===',
       ...results.user,
