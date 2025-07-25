@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const step1 = document.createElement('div');
   step1.innerHTML = `
     <h2>Step 1: 기본 정보 입력</h2>
-    <div class="notice">※ 사용하지 않는 정보에 대해 체크해주세요.</div>
     <div class="notice" style="color: red; margin-bottom: 4px;">※ 비밀번호는 특수문자 1개만 포함해야 합니다.</div>
     <div class="notice" style="color: red; margin-bottom: 4px;">※ 7-10자리의 비밀번호를 생각해주세요.</div>
     <div class="notice" style="color: yellow; margin-bottom: 4px;">※ 사용하지 <span style="text-decoration: underline;">않는</span> 정보에 대해 체크해주세요.</div>
