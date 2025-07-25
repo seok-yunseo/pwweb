@@ -1,5 +1,3 @@
-const leetMap = { a: '@', s: '$', i: '1', o: '0', e: '3' };
-
 function isValid(pw) {
   const specials = pw.match(/[!@#$]/g) || [];
   return (
@@ -11,31 +9,39 @@ function isValid(pw) {
   );
 }
 
+/** 사용자 데이터 기반 패턴 */
 function generateFromUserInfo(info) {
   const baseWords = [];
 
-  // 이름, 성, 닉네임, 펫네임
-  if (info.options.useNick && info.nickname) baseWords.push(info.nickname);
-  if (info.options.usePet && info.petNames?.length) baseWords.push(...info.petNames);
+  // 닉네임, 반려동물 이름
+  if (info.options.useNick && info.nickname) baseWords.push(info.nickname.toLowerCase());
+  if (info.options.usePet && info.petNames?.length)
+    baseWords.push(...info.petNames.map((p) => p.toLowerCase()));
+
+  // 이름, 성
   if (info.options.useName) {
-    if (info.firstName) baseWords.push(info.firstName);
-    if (info.lastName) baseWords.push(info.lastName);
+    if (info.firstName) baseWords.push(info.firstName.toLowerCase());
+    if (info.lastName) baseWords.push(info.lastName.toLowerCase());
   }
 
-  // 이니셜 패턴 추가
-  if (info.options.useInitial && info.firstName && info.lastName) {
-    const first = info.firstName.toLowerCase();
-    const last = info.lastName.toLowerCase();
+  // 대문자 이니셜 -> 소문자화
+  if (info.options.useInitial) {
+    const initials = (info.firstName + info.lastName)
+      .split('')
+      .filter((ch) => /[A-Z]/.test(ch))
+      .join('')
+      .toLowerCase();
 
-    // 요구된 이니셜 조합
-    baseWords.push(last[0] + first[0]);        // ys
-    baseWords.push(last[0] + first[0] + 's');  // sys
-    baseWords.push(last[0] + first + last);    // ys + 이름 + 성 -> ysseok
-    baseWords.push(last[0] + first);           // syunseo (성 앞글자 + 이름 전체)
-    baseWords.push(last + first[0] + 's');     // seokys
+    if (initials.length >= 2 && info.lastName && info.firstName) {
+      baseWords.push(initials); // ys
+      baseWords.push(initials + 's'); // yss
+      baseWords.push(initials + info.lastName.toLowerCase()); // ysseok
+      baseWords.push(initials[0] + info.firstName.toLowerCase()); // ysunseo
+      baseWords.push(info.lastName.toLowerCase() + initials); // seokys
+    }
   }
 
-  // 숫자 조합
+  // 숫자 파트
   const numberParts = [];
   const y = info.birthYear || '';
   const m = info.birthMonth || '';
@@ -43,22 +49,23 @@ function generateFromUserInfo(info) {
   if (y && m && d) numberParts.push(y, m + d, y.slice(2) + m + d);
   if (info.phone?.length >= 4) numberParts.push(info.phone.slice(-4));
   if (info.homePhone?.length >= 4) numberParts.push(info.homePhone.slice(-4));
-  if (info.options.useFavNums && info.favNums?.length) numberParts.push(...info.favNums);
+  if (info.options.useFavNums && info.favNums?.length)
+    numberParts.push(...info.favNums);
 
   const specials = ['!', '@', '#', '$'];
   const results = new Set();
 
   for (let word of baseWords) {
-    const cleanWord = word?.toLowerCase()?.trim();
+    const cleanWord = word?.trim();
     if (!cleanWord) continue;
 
     for (let num of numberParts) {
       for (let s of specials) {
         const patterns = [
-          cleanWord + num + s,
-          s + cleanWord + num,
-          cleanWord + s + num,
-          num + cleanWord + s,
+          cleanWord + num + s, // 1
+          s + cleanWord + num, // 2
+          s + num + cleanWord, // 3
+          num + cleanWord + s, // 4
         ];
         for (let pw of patterns) {
           if (isValid(pw)) results.add(pw);
@@ -66,41 +73,83 @@ function generateFromUserInfo(info) {
       }
     }
   }
-  return Array.from(results);
+
+  console.log("[DEBUG] user baseWords:", baseWords, "numberParts:", numberParts, "count:", results.size);
+
+  return {
+    pw: Array.from(results),
+    numberParts,
+  };
 }
 
-function generateFromCommonPasswords(commonList = []) {
+/** Nord(letters + mixed) 기반 패턴 */
+function generateFromNordWords(nordWords = [], numberParts = []) {
+  const specials = ['!', '@', '#', '$'];
   const results = new Set();
-  for (let pw of commonList) {
-    const clean = pw.toLowerCase().trim();
-    if (isValid(clean)) results.add(clean);
+
+  for (let word of nordWords) {
+    const cleanWord = word?.toLowerCase()?.trim();
+    if (!cleanWord) continue;
+
+    for (let num of numberParts) {
+      for (let s of specials) {
+        const patterns = [
+          cleanWord + num + s, // 1
+          s + cleanWord + num, // 2
+          s + num + cleanWord, // 3
+          num + cleanWord + s, // 4
+        ];
+        for (let pw of patterns) {
+          if (isValid(pw)) results.add(pw);
+        }
+      }
+    }
   }
+
+  console.log("[DEBUG] nordWords count:", results.size);
   return Array.from(results);
 }
 
-function generateMixPasswords(userPw, nordPw, max = 500) {
+/** Mix: userWord + nordNum */
+function generateMixPasswords(userWords, nordNumWords = [], max = 500) {
   const specials = ['!', '@', '#', '$'];
   const mixResults = new Set();
 
-  for (let u of userPw) {
-    for (let n of nordPw) {
+  for (let u of userWords) {
+    for (let n of nordNumWords) {
       for (let s of specials) {
         if (mixResults.size >= max) return Array.from(mixResults);
 
-        const patterns = [u + n + s, n + u + s];
+        const patterns = [
+          u + n + s, // 1
+          n + u + s, // 2
+          s + u + n, // 3
+          s + n + u, // 4
+        ];
+
         for (let pw of patterns) {
           if (isValid(pw)) mixResults.add(pw);
         }
       }
     }
   }
+
+  console.log("[DEBUG] mix count:", mixResults.size);
   return Array.from(mixResults);
 }
 
-export function generatePasswords(info, commonPasswords = []) {
-  const userPw = generateFromUserInfo(info);
-  const nordPw = generateFromCommonPasswords(commonPasswords);
-  const mixPw = generateMixPasswords(userPw, nordPw, 500);
+/** 최종 함수 */
+export function generatePasswords(info, nordData = { nordWord: [], nordNum: [] }) {
+  const { nordWord, nordNum } = nordData;
+
+  // 1️⃣ User 기반
+  const { pw: userPw, numberParts } = generateFromUserInfo(info);
+
+  // 2️⃣ Nord 기반 (letters + mixed)
+  const nordPw = generateFromNordWords(nordWord, numberParts);
+
+  // 3️⃣ Mix (userWords + nordNum)
+  const mixPw = generateMixPasswords(userPw, nordNum, 500);
 
   return {
     user: userPw,

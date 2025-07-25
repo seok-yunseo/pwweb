@@ -1,15 +1,10 @@
 import { generatePasswords } from './algorithm/generate.js';
 
-async function loadNordData() {
-  // Nord 데이터 로드
-  const letters = await fetch('./pwdb/nord_letters.json').then(res => res.json());
-  const mixed = await fetch('./pwdb/nord_mixed.json').then(res => res.json());
-  const numeric = await fetch('./pwdb/nord_numeric.json').then(res => res.json());
-  return [...letters, ...mixed, ...numeric];
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  const nordData = await loadNordData(); // Nord 데이터 준비
+  // Nord 데이터 fetch로 로드
+  const nordLetters = await (await fetch('./pwdb/nord_letters.json')).json();
+  const nordMixed = await (await fetch('./pwdb/nord_mixed.json')).json();
+  const nordNumeric = await (await fetch('./pwdb/nord_numeric.json')).json();
 
   // 스타일 정의
   const style = document.createElement('style');
@@ -80,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <input id="firstName" type="text" placeholder="이름 입력 (예: Min)" />
     <input id="lastName" type="text" placeholder="성 입력 (예: Kim)" />
 
-    <label><span class="question">이니셜 사용</span><input type="checkbox" id="useInitial" checked /></label>
+    <label><span class="question">이니셜 사용 (예: SY)</span><input type="checkbox" id="useInitial" /></label>
 
     <label><span class="question">생년월일</span><input type="checkbox" id="noBirth" /></label>
     <input id="birth" type="date" />
@@ -120,6 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   container.appendChild(resultBox);
   document.body.appendChild(container);
 
+  // 체크박스 → 입력 비활성화
   function toggleInput(checkboxId, inputId) {
     const checkbox = document.getElementById(checkboxId);
     const input = document.getElementById(inputId);
@@ -128,15 +124,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (checkbox.checked) input.value = '';
     });
   }
+
   toggleInput('noHomePhone', 'homePhone');
   toggleInput('noPhone', 'phone');
   toggleInput('noBirth', 'birth');
 
+  // Step 이동
   document.getElementById('toStep2').addEventListener('click', () => {
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
   });
 
+  // 비밀번호 생성
   document.getElementById('generate').addEventListener('click', async () => {
     const birth = document.getElementById('birth').value.split('-');
 
@@ -173,7 +172,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     resultBox.textContent = '비밀번호 생성 중...';
-    const results = await generatePasswords(userData, nordData);
+
+    const results = await generatePasswords(userData, {
+      nordWord: [...nordLetters, ...nordMixed],
+      nordNum: nordNumeric, // numeric 데이터는 여기로
+    });
+
 
     resultBox.innerHTML = `
       <h3>USERDATA (총 ${results.user.length}개)</h3>
