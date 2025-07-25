@@ -1,25 +1,15 @@
 // algorithm/generate.js
 const leetMap = { a: '@', s: '$', i: '1', o: '0', e: '3' };
 
-/** Leet 변환 */
-function applyLeet(word, useLeet) {
-  if (!useLeet) return word;
-  return word
-    .split('')
-    .map((c) => leetMap[c] || c)
-    .join('');
-}
-
-/** 비밀번호 유효성 검사 */
+/** 비밀번호 유효성 검사 (특수문자 1개만 허용) */
 function isValid(pw) {
-  // 특수문자는 반드시 1개만 사용 (!, @, #, $만 허용)
   const specials = pw.match(/[!@#$]/g) || [];
   return (
     pw.length >= 7 &&
     pw.length <= 10 &&
-    /[a-z]/i.test(pw) &&      // 영문 포함
-    /[0-9]/.test(pw) &&       // 숫자 포함
-    specials.length === 1     // 특수문자 정확히 1개
+    /[a-z]/i.test(pw) &&        // 영문 포함
+    /[0-9]/.test(pw) &&         // 숫자 포함
+    specials.length === 1       // 특수문자 정확히 1개
   );
 }
 
@@ -34,19 +24,24 @@ function generateFromUserInfo(info) {
   if (info.options.useInitial && info.firstName && info.lastName)
     baseWords.push(info.firstName[0] + info.lastName[0]);
 
+  // 숫자 후보들
   const numberParts = [];
-  if (info.birth) {
-    const [y, m, d] = info.birth.split('-');
+  const y = info.birthYear || '';
+  const m = info.birthMonth || '';
+  const d = info.birthDay || '';
+  if (y && m && d) {
     numberParts.push(y, m + d, y.slice(2) + m + d);
   }
+
   if (info.phone?.length >= 4) numberParts.push(info.phone.slice(-4));
   if (info.homePhone?.length >= 4) numberParts.push(info.homePhone.slice(-4));
   if (info.options.useFavNums && info.favNums?.length)
     numberParts.push(...info.favNums);
 
-  const specials = ['!', '@', '#', '$']; // 특수문자 제한
-  const useLeet = info.useLeet;
+  console.log('[DEBUG] baseWords:', baseWords);
+  console.log('[DEBUG] numberParts:', numberParts);
 
+  const specials = ['!', '@', '#', '$']; // 특수문자 제한
   const results = new Set();
 
   for (let word of baseWords) {
@@ -55,13 +50,12 @@ function generateFromUserInfo(info) {
 
     for (let num of numberParts) {
       for (let s of specials) {
+        // 1~4번 패턴만 사용
         const patterns = [
-          cleanWord + num + s,
-          s + cleanWord + num,
-          cleanWord + s + num,
-          num + cleanWord + s,
-          applyLeet(cleanWord, useLeet) + num + s,
-          applyLeet(cleanWord + num, useLeet) + s,
+          cleanWord + num + s,     // 1. word + num + s
+          s + cleanWord + num,     // 2. s + word + num
+          cleanWord + s + num,     // 3. word + s + num
+          num + cleanWord + s      // 4. num + word + s
         ];
 
         for (let pw of patterns) {
@@ -84,18 +78,50 @@ function generateFromCommonPasswords(commonList = []) {
   return Array.from(results);
 }
 
-/** 최종 호출 함수 */
-export function generatePasswords(info, commonPasswords = []) {
-  const finalSet = new Set();
+/** User + Nord 혼합(MIX) 비밀번호 생성 */
+function generateMixPasswords(userPw, nordPw, max = 500) {
+  const specials = ['!', '@', '#', '$'];
+  const mixResults = new Set();
 
+  // user + nord 조합
+  for (let u of userPw) {
+    for (let n of nordPw) {
+      for (let s of specials) {
+        if (mixResults.size >= max) return Array.from(mixResults); // 최대 개수 제한
+
+        const patterns = [
+          u + n + s,
+          n + u + s
+        ];
+
+        for (let pw of patterns) {
+          if (isValid(pw)) mixResults.add(pw);
+        }
+      }
+    }
+  }
+
+  return Array.from(mixResults);
+}
+
+/** 최종 호출 함수 (객체 반환) */
+export function generatePasswords(info, commonPasswords = []) {
   // 1️⃣ 사용자 기반
   const userPw = generateFromUserInfo(info);
-  userPw.forEach((pw) => finalSet.add(pw));
 
   // 2️⃣ nord 일반 비번 (조건 맞는 것만)
   const nordPw = generateFromCommonPasswords(commonPasswords);
-  nordPw.forEach((pw) => finalSet.add(pw));
 
-  // 3️⃣ 랜덤 보충 제거 (없으면 없는대로)
-  return Array.from(finalSet);
+  // 3️⃣ user + nord 혼합 (최대 500개)
+  const mixPw = generateMixPasswords(userPw, nordPw, 500);
+
+  console.log('[DEBUG] userPw count:', userPw.length);
+  console.log('[DEBUG] nordPw count:', nordPw.length);
+  console.log('[DEBUG] mixPw count:', mixPw.length);
+
+  return {
+    user: userPw,
+    nord: nordPw,
+    mix: mixPw
+  };
 }
