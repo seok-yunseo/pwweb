@@ -1,14 +1,9 @@
 // question.js
-import { generatePasswords } from './algorithm/generate.js';
+import { generatePasswords } from "./algorithm/generate.js";
 
-<<<<<<< HEAD
-document.addEventListener('DOMContentLoaded', () => {
-  // 스타일 통일 (start.js와 동일 톤)
-  const style = document.createElement('style');
-=======
 document.addEventListener("DOMContentLoaded", () => {
+  // 스타일 그대로
   const style = document.createElement("style");
->>>>>>> 6ae8d00 (숮어)
   style.textContent = `
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
     body {
@@ -21,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      width: 500px;
+      width: 520px;
       animation: fadeIn 0.8s ease-in;
       text-align:center;
       max-height: 90vh;
@@ -44,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       margin-top:18px; transition:background 0.3s;
     }
     button:hover { background:#ffb74d; }
+    .inline-group { display:flex; align-items:center; gap:8px; }
     .hidden { display:none; }
     #resultBox {
       margin-top:20px; text-align:left;
@@ -51,31 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
       border-radius: 6px; padding:12px;
       white-space:pre-wrap; font-size:0.9rem;
     }
-    .inline-group { display:flex; align-items:center; gap:8px; }
+    h3 { margin-top:20px; }
     a.download-link {
       display:block; text-align:center; margin-top:12px; color:#fff;
       text-decoration:none; background:#ff9800; padding:10px; border-radius:6px;
     }
     a.download-link:hover { background:#ffb74d; }
-    h3 { margin-top:20px; }
   `;
   document.head.appendChild(style);
 
-<<<<<<< HEAD
-  // 컨테이너 생성
-  const container = document.createElement('div');
-  container.classList.add('container');
-
-  // Step1 UI
-  const step1 = document.createElement('div');
-=======
-  // 컨테이너
   const container = document.createElement("div");
   container.classList.add("container");
 
-  // Step1
+  // Step1 (기본정보)
   const step1 = document.createElement("div");
->>>>>>> 6ae8d00 (숮어)
   step1.innerHTML = `
     <h2>Step 1: 기본 정보 입력</h2>
     <label>이름</label><input id="firstName" type="text" placeholder="MIN" />
@@ -90,57 +75,40 @@ document.addEventListener("DOMContentLoaded", () => {
     <button id="toStep2">다음</button>
   `;
 
-<<<<<<< HEAD
-  // Step2 UI
-  const step2 = document.createElement('div');
-  step2.classList.add('hidden');
-=======
-  // Step2
+  // Step2 (옵션 선택 - Nord/MIX 제외)
   const step2 = document.createElement("div");
   step2.classList.add("hidden");
->>>>>>> 6ae8d00 (숮어)
   step2.innerHTML = `
-    <h2>Step 2: 추가 정보 입력</h2>
+    <h2>Step 2: 추가 정보 입력 & 조건 선택</h2>
     <label>별명</label><input id="nickname" type="text" />
+
     <label>반려동물 이름들 (쉼표로 구분)</label>
     <div class="inline-group">
       <input id="petNames" type="text" />
       <label><input id="noPet" type="checkbox" /> 없음</label>
     </div>
-    <label>자주 사용하는 숫자들 (쉼표로 구분)</label><input id="favNums" type="text" />
-    <label>비밀번호에 이름 포함?</label>
-    <select id="includeName">
-      <option value="yes">예</option><option value="no">아니오</option>
-    </select>
+
+    <label>자주 사용하는 숫자들 (쉼표로 구분)</label>
+    <input id="favNums" type="text" />
+
+    <h3>비밀번호 조합 옵션</h3>
+    <label><input type="checkbox" id="useName" checked /> 이름/성 사용</label>
+    <label><input type="checkbox" id="useInitial" /> 이니셜 사용 (예: SY)</label>
+    <label><input type="checkbox" id="usePet" /> 반려동물 이름 사용</label>
+    <label><input type="checkbox" id="useNick" /> 닉네임 사용</label>
+
     <button id="generate">비밀번호 생성</button>
-    <!-- 여기에 버튼 추가 -->
-  <button id="toPasswordCheck" style="margin-top: 10px;">비밀번호 강도 체크로 이동</button>
   `;
 
   // 결과 박스
-  const resultBox = document.createElement('div');
-  resultBox.id = 'resultBox';
+  const resultBox = document.createElement("div");
+  resultBox.id = "resultBox";
 
   container.appendChild(step1);
   container.appendChild(step2);
   container.appendChild(resultBox);
   document.body.appendChild(container);
 
-<<<<<<< HEAD
-  document.getElementById('toPasswordCheck').addEventListener('click', () => {
-    window.location.href = 'end.html';
-  });
-
-  // 이벤트: Step1 → Step2
-  document.getElementById('toStep2').addEventListener('click', () => {
-    step1.classList.add('hidden');
-    step2.classList.remove('hidden');
-  });
-
-  // 이벤트: 비밀번호 생성
-  document.getElementById('generate').addEventListener('click', async () => {
-    const birth = document.getElementById('birth').value.split('-');
-=======
   // Step 전환
   document.getElementById("toStep2").addEventListener("click", () => {
     step1.classList.add("hidden");
@@ -150,29 +118,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // 비밀번호 생성
   document.getElementById("generate").addEventListener("click", async () => {
     const birth = document.getElementById("birth").value.split("-");
->>>>>>> 6ae8d00 (숮어)
+
     const userData = {
-      firstName: document.getElementById('firstName').value.trim(),
-      lastName: document.getElementById('lastName').value.trim(),
-      nickname: document.getElementById('nickname').value.trim(),
-      petNames: document.getElementById('noPet').checked
+      firstName: document.getElementById("firstName").value.trim(),
+      lastName: document.getElementById("lastName").value.trim(),
+      nickname: document.getElementById("nickname").value.trim(),
+      petNames: document.getElementById("noPet").checked
         ? []
-<<<<<<< HEAD
-        : document
-            .getElementById('petNames')
-            .value.split(',')
-            .map((p) => p.trim()),
-      birthYear: birth[0],
-      birthMonth: birth[1],
-      birthDay: birth[2],
-      phone: document.getElementById('phone').value.trim(),
-      favNums: document
-        .getElementById('favNums')
-        .value.split(',')
-        .map((n) => n.trim())
-        .filter(Boolean),
-      includeName: document.getElementById('includeName').value === 'yes',
-=======
         : document.getElementById("petNames").value.split(",").map((p) => p.trim()),
       birthYear: birth[0],
       birthMonth: birth[1],
@@ -185,29 +137,20 @@ document.addEventListener("DOMContentLoaded", () => {
         .split(",")
         .map((n) => n.trim())
         .filter(Boolean),
-      includeName: document.getElementById("includeName").value === "yes",
->>>>>>> 6ae8d00 (숮어)
+
+      // 새 옵션 (Nord/MIX는 항상 true)
+      options: {
+        useName: document.getElementById("useName").checked,
+        useInitial: document.getElementById("useInitial").checked,
+        usePet: document.getElementById("usePet").checked,
+        useNick: document.getElementById("useNick").checked,
+      },
     };
 
-    resultBox.textContent = '비밀번호 생성 중...';
+    resultBox.textContent = "비밀번호 생성 중...";
 
     const results = await generatePasswords(userData);
 
-<<<<<<< HEAD
-    // 결과 미리보기
-    const preview = txtContent.split('\n').slice(0, 30).join('\n');
-    resultBox.innerHTML = `<pre>${preview}\n... (생략)</pre>`;
-
-    // 다운로드 버튼
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(
-      new Blob([txtContent], { type: 'text/plain' })
-    );
-    a.download = 'password_dataset.txt';
-    a.textContent = '👉 전체 비밀번호 데이터셋 다운로드';
-    a.className = 'download-link';
-=======
-    // 화면 출력 (각 30개씩)
     resultBox.innerHTML = `
       <h3>USERDATA (총 ${results.user.length}개)</h3>
       <pre>${results.user.slice(0, 30).join("\n")}</pre>
@@ -217,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <pre>${results.mix.slice(0, 30).join("\n")}</pre>
     `;
 
-    // 전체 TXT 다운로드
+    // TXT 전체 다운로드
     const allContent = [
       "=== [USERDATA-ONLY] ===",
       ...results.user,
@@ -234,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
     a.download = "password_dataset.txt";
     a.textContent = "👉 전체 비밀번호 데이터셋 다운로드";
     a.className = "download-link";
->>>>>>> 6ae8d00 (숮어)
     resultBox.appendChild(a);
   });
 });
