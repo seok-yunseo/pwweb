@@ -75,6 +75,44 @@
 
   <div id="result"></div>
 
-  <script src="js/generator.js"></script>
+  <!-- 아래 모듈 스크립트를 사용 -->
+  <script type="module">
+    import { generatePasswords } from './js/generator.js';
+
+    function loadUserInfo() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) {
+        alert("user_info.json 파일을 선택하세요.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const info = JSON.parse(e.target.result);
+        const passwords = generatePasswords(info);
+        displayPasswords(passwords);
+      };
+      reader.readAsText(file);
+    }
+
+    function displayPasswords(passwords) {
+      const resultEl = document.getElementById("result");
+      resultEl.innerHTML =
+        `✅ 총 ${passwords.length}개의 비밀번호가 생성되었습니다.\n\n샘플:\n` +
+        passwords.slice(0, 10).join('\n');
+
+      const blob = new Blob([passwords.join('\n')], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'generated_passwords.txt';
+      a.textContent = '👉 예상 비밀번호 파일 다운로드';
+      a.className = 'download-link';
+      resultEl.appendChild(document.createElement('br'));
+      resultEl.appendChild(a);
+    }
+
+    // 전역 바인딩 (onclick 작동을 위해)
+    window.loadUserInfo = loadUserInfo;
+  </script>
 </body>
 </html>
