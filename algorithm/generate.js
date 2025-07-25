@@ -48,7 +48,7 @@ function generateFromUserInfo(info) {
   }
 
   // 이니셜
-  if (info.options.useInitial) {
+  if (!(info.options.useInitial)) {
     const initialsLast = [];
     const initialsFirst = [];
 
