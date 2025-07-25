@@ -1,6 +1,12 @@
 import { generatePasswords } from './algorithm/generate.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // 커스텀 체크박스 CSS만 따로 로드
+  const checkboxStyle = document.createElement('link');
+  checkboxStyle.rel = 'stylesheet';
+  checkboxStyle.href = './css/checkbox.css';
+  document.head.appendChild(checkboxStyle);
+
   // 스타일 정의
   const style = document.createElement('style');
   style.textContent = `
@@ -65,23 +71,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   const step1 = document.createElement('div');
   step1.innerHTML = `
     <h2>Step 1: 기본 정보 입력</h2>
-    <div class="notice" style="color: red; margin-bottom: 4px;">※ 비밀번호는 특수문자 1개만 포함해야 합니다.</div>
-    <div class="notice" style="color: red; margin-bottom: 4px;">※ 7-10자리의 비밀번호를 생각해주세요.</div>
-    <div class="notice" style="color: yellow; margin-bottom: 4px;">※ 사용하지 <span style="text-decoration: underline;">않는</span> 정보에 대해 체크해주세요.</div>
+    <div class="notice">※ 사용하지 않는 정보에 대해 체크해주세요.</div>
 
-    <label><span class="question">이름/성 사용 </span><input type="checkbox" id="useName" /></label>
+    <div class="checkbox-wrapper"><span class="question">이름/성 사용</span><input type="checkbox" id="useName" /></div>
     <input id="firstName" type="text" placeholder="이름 입력 (예: Min)" />
     <input id="lastName" type="text" placeholder="성 입력 (예: Kim)" />
 
-    <label><span class="question">이니셜 사용 </span><input type="checkbox" id="useInitial" /></label>
+    <div class="checkbox-wrapper"><span class="question">이니셜 사용 (예: SY)</span><input type="checkbox" id="useInitial" /></div>
 
-    <label><span class="question">생년월일</span><input type="checkbox" id="noBirth" /></label>
+    <div class="checkbox-wrapper"><span class="question">생년월일</span><input type="checkbox" id="noBirth" /></div>
     <input id="birth" type="date" />
 
-    <label><span class="question">휴대전화번호</span><input type="checkbox" id="noPhone" /></label>
+    <div class="checkbox-wrapper"><span class="question">휴대전화번호</span><input type="checkbox" id="noPhone" /></div>
     <input id="phone" type="text" placeholder="01012345678" />
 
-    <label><span class="question">집전화번호</span><input type="checkbox" id="noHomePhone" /></label>
+    <div class="checkbox-wrapper"><span class="question">집전화번호</span><input type="checkbox" id="noHomePhone" /></div>
     <input id="homePhone" type="text" placeholder="집전화번호 (예: 0212345678)" />
 
     <button id="toStep2">다음</button>
@@ -93,13 +97,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   step2.innerHTML = `
     <h2>Step 2: 추가 정보 입력</h2>
 
-    <label><span class="question">닉네임 사용</span><input type="checkbox" id="useNick" /></label>
+    <div class="checkbox-wrapper"><span class="question">닉네임 사용</span><input type="checkbox" id="useNick" /></div>
     <input id="nickname" type="text" placeholder="닉네임 입력" />
 
-    <label><span class="question">반려동물 이름 사용</span><input type="checkbox" id="usePet" /></label>
+    <div class="checkbox-wrapper"><span class="question">반려동물 이름 사용</span><input type="checkbox" id="usePet" /></div>
     <input id="petNames" type="text" placeholder="쉼표로 구분 (예: coco, choco)" />
 
-    <label><span class="question">자주 사용하는 숫자</span><input type="checkbox" id="useFavNums" /></label>
+    <div class="checkbox-wrapper"><span class="question">자주 사용하는 숫자 사용</span><input type="checkbox" id="useFavNums" /></div>
     <input id="favNums" type="text" placeholder="쉼표로 구분 (예: 77, 14, 99)" />
 
     <button id="generate">비밀번호 생성</button>
