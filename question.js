@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <h2>Step 1: 기본 정보 입력</h2>
     <div class="notice">※ 사용하지 않는 정보에 대해 체크해주세요.</div>
 
-    <label><span class="question">이름/성 사용</span><input type="checkbox" id="useName" checked /></label>
+    <label><span class="question">이름/성 사용</span><input type="checkbox" id="useName" /></label>
     <input id="firstName" type="text" placeholder="이름 입력 (예: Min)" />
     <input id="lastName" type="text" placeholder="성 입력 (예: Kim)" />
 
@@ -91,13 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   step2.innerHTML = `
     <h2>Step 2: 추가 정보 입력</h2>
 
-    <label><span class="question">닉네임 사용</span><input type="checkbox" id="useNick" checked /></label>
+    <label><span class="question">닉네임 사용</span><input type="checkbox" id="useNick" /></label>
     <input id="nickname" type="text" placeholder="닉네임 입력" />
 
-    <label><span class="question">반려동물 이름 사용</span><input type="checkbox" id="usePet" checked /></label>
+    <label><span class="question">반려동물 이름 사용</span><input type="checkbox" id="usePet" /></label>
     <input id="petNames" type="text" placeholder="쉼표로 구분 (예: coco, choco)" />
 
-    <label><span class="question">자주 사용하는 숫자 사용</span><input type="checkbox" id="useFavNums" checked /></label>
+    <label><span class="question">자주 사용하는 숫자 사용</span><input type="checkbox" id="useFavNums" /></label>
     <input id="favNums" type="text" placeholder="쉼표로 구분 (예: 77, 14, 99)" />
 
     <button id="generate">비밀번호 생성</button>

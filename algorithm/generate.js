@@ -86,10 +86,13 @@ function generateFromUserInfo(info) {
 
   // 숫자 파트
   const numberParts = [];
-  if (info.birthYear && info.birthMonth && info.birthDay) {
-    numberParts.push(info.birthYear);
-    numberParts.push(info.birthMonth + info.birthDay);
-    numberParts.push(info.birthYear.slice(2) + info.birthMonth + info.birthDay);
+   if (info.birthYear && info.birthMonth && info.birthDay) {
+    numberParts.push(info.birthYear); // 예: "1995"
+    numberParts.push(info.birthYear.slice(2)); // 예: "95"
+    numberParts.push(info.birthMonth); // 예: "05"
+    numberParts.push(info.birthDay); // 예: "17"
+    numberParts.push(info.birthMonth + info.birthDay); // 예: "0517"
+    numberParts.push(info.birthYear.slice(2) + info.birthMonth + info.birthDay); // "950517"
   }
   if (info.phone?.length >= 4) numberParts.push(info.phone.slice(-4));
   if (info.homePhone?.length >= 4) numberParts.push(info.homePhone.slice(-4));
@@ -149,38 +152,72 @@ function generateFromNordWords(nordWords = [], numberParts = []) {
 }
 
 // Mix: userWord + nordNum
-function generateMixPasswords(userWords, nordNumWords = [], max = 500) {
+// Mix: user baseWords + numberParts + nordWords + nord numberParts
+function generateMixPasswords(
+  userWords = [],
+  userNumbers = [],
+  nordWords = [],
+  nordNumbers = [],
+  max = 500
+) {
   const specials = ['!', '@', '#', '$'];
   const mixResults = new Set();
 
-  for (let u of userWords) {
-    for (let n of nordNumWords) {
-      for (let s of specials) {
-        if (mixResults.size >= max) return Array.from(mixResults);
+  for (let uw of userWords) {
+    for (let nn of nordNumbers) {
+      for (let nw of nordWords) {
+        for (let un of userNumbers) {
+          for (let s of specials) {
+            if (mixResults.size >= max) return Array.from(mixResults);
 
-        const patterns = [u + n + s, n + u + s, s + u + n, s + n + u];
-        for (let pw of patterns) {
-          if (isValid(pw)) mixResults.add(pw);
+            // 1. s + uw + nn
+            const p1 = `${s}${uw}${nn}`;
+            // 2. s + nn + uw
+            const p2 = `${s}${nn}${uw}`;
+            // 3. s + nw + un
+            const p3 = `${s}${nw}${un}`;
+            // 4. s + un + nw
+            const p4 = `${s}${un}${nw}`;
+
+            // 5. uw + nn + s
+            const p5 = `${uw}${nn}${s}`;
+            // 6. nn + uw + s
+            const p6 = `${nn}${uw}${s}`;
+            // 7. nw + un + s
+            const p7 = `${nw}${un}${s}`;
+            // 8. un + nw + s
+            const p8 = `${un}${nw}${s}`;
+
+            const patterns = [p1, p2, p3, p4, p5, p6, p7, p8];
+
+            for (let pw of patterns) {
+              if (isValid(pw)) mixResults.add(pw);
+            }
+          }
         }
       }
     }
   }
+
   console.log('[DEBUG] mix count:', mixResults.size);
   return Array.from(mixResults);
 }
 
+
 // 최종 함수
 export async function generatePasswords(info) {
-  const { pw: userPw, numberParts } = generateFromUserInfo(info);
+  // 1. userData
+  const { pw: userPw, numberParts: userNum } = generateFromUserInfo(info);
 
-  // Nord 데이터 직접 로딩
+  // 2. nordData
   const { nordWord, nordNum } = await loadNordData();
 
-  // Nord는 userData와 무관하게 생성
-  const nordPw = generateFromNordWords(nordWord, nordNum);
+  // 3. mixed
+  const mixPw = generateMixPasswords(userPw, userNum, nordWord, nordNum, 500);
 
-  // Mix: user + nordNum
-  const mixPw = generateMixPasswords(userPw, nordNum, 500);
+  // 4. nord만
+  const nordPw = generateFromNordWords(nordWord, nordNum);
 
   return { user: userPw, nord: nordPw, mix: mixPw };
 }
+
