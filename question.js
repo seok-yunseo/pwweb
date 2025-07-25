@@ -1,9 +1,9 @@
 // question.js
-import { generatePasswords } from "./algorithm/generate.js";
+import { generatePasswords } from './algorithm/generate.js';
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   // 스타일 통일 (start.js와 동일 톤)
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.textContent = `
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
     body {
@@ -54,11 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.head.appendChild(style);
 
   // 컨테이너 생성
-  const container = document.createElement("div");
-  container.classList.add("container");
+  const container = document.createElement('div');
+  container.classList.add('container');
 
   // Step1 UI
-  const step1 = document.createElement("div");
+  const step1 = document.createElement('div');
   step1.innerHTML = `
     <h2>Step 1: 기본 정보 입력</h2>
     <label>이름</label><input id="firstName" type="text" placeholder="Min" />
@@ -74,8 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
 
   // Step2 UI
-  const step2 = document.createElement("div");
-  step2.classList.add("hidden");
+  const step2 = document.createElement('div');
+  step2.classList.add('hidden');
   step2.innerHTML = `
     <h2>Step 2: 추가 정보 입력</h2>
     <label>별명</label><input id="nickname" type="text" />
@@ -90,55 +90,70 @@ document.addEventListener("DOMContentLoaded", () => {
       <option value="yes">예</option><option value="no">아니오</option>
     </select>
     <button id="generate">비밀번호 생성</button>
+    <!-- 여기에 버튼 추가 -->
+  <button id="toPasswordCheck" style="margin-top: 10px;">비밀번호 강도 체크로 이동</button>
   `;
 
   // 결과 박스
-  const resultBox = document.createElement("div");
-  resultBox.id = "resultBox";
+  const resultBox = document.createElement('div');
+  resultBox.id = 'resultBox';
 
   container.appendChild(step1);
   container.appendChild(step2);
   container.appendChild(resultBox);
   document.body.appendChild(container);
 
+  document.getElementById('toPasswordCheck').addEventListener('click', () => {
+    window.location.href = 'end.html';
+  });
+
   // 이벤트: Step1 → Step2
-  document.getElementById("toStep2").addEventListener("click", () => {
-    step1.classList.add("hidden");
-    step2.classList.remove("hidden");
+  document.getElementById('toStep2').addEventListener('click', () => {
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
   });
 
   // 이벤트: 비밀번호 생성
-  document.getElementById("generate").addEventListener("click", async () => {
-    const birth = document.getElementById("birth").value.split("-");
+  document.getElementById('generate').addEventListener('click', async () => {
+    const birth = document.getElementById('birth').value.split('-');
     const userData = {
-      firstName: document.getElementById("firstName").value.trim(),
-      lastName: document.getElementById("lastName").value.trim(),
-      nickname: document.getElementById("nickname").value.trim(),
-      petNames: document.getElementById("noPet").checked
+      firstName: document.getElementById('firstName').value.trim(),
+      lastName: document.getElementById('lastName').value.trim(),
+      nickname: document.getElementById('nickname').value.trim(),
+      petNames: document.getElementById('noPet').checked
         ? []
-        : document.getElementById("petNames").value.split(",").map(p => p.trim()),
+        : document
+            .getElementById('petNames')
+            .value.split(',')
+            .map((p) => p.trim()),
       birthYear: birth[0],
       birthMonth: birth[1],
       birthDay: birth[2],
-      phone: document.getElementById("phone").value.trim(),
-      favNums: document.getElementById("favNums").value.split(",").map(n => n.trim()).filter(Boolean),
-      includeName: document.getElementById("includeName").value === "yes"
+      phone: document.getElementById('phone').value.trim(),
+      favNums: document
+        .getElementById('favNums')
+        .value.split(',')
+        .map((n) => n.trim())
+        .filter(Boolean),
+      includeName: document.getElementById('includeName').value === 'yes',
     };
 
-    resultBox.textContent = "비밀번호 생성 중...";
+    resultBox.textContent = '비밀번호 생성 중...';
 
     const txtContent = await generatePasswords(userData);
 
     // 결과 미리보기
-    const preview = txtContent.split("\n").slice(0, 30).join("\n");
+    const preview = txtContent.split('\n').slice(0, 30).join('\n');
     resultBox.innerHTML = `<pre>${preview}\n... (생략)</pre>`;
 
     // 다운로드 버튼
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([txtContent], { type: "text/plain" }));
-    a.download = "password_dataset.txt";
-    a.textContent = "👉 전체 비밀번호 데이터셋 다운로드";
-    a.className = "download-link";
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(
+      new Blob([txtContent], { type: 'text/plain' })
+    );
+    a.download = 'password_dataset.txt';
+    a.textContent = '👉 전체 비밀번호 데이터셋 다운로드';
+    a.className = 'download-link';
     resultBox.appendChild(a);
   });
 });
