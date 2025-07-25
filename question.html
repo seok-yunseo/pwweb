@@ -1,65 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>사용자 정보 입력</title>
-  <style>
-    body { font-family: sans-serif; padding: 40px; max-width: 600px; margin: auto; }
-    label { display: block; margin-top: 15px; }
-    input, select, button {
-      margin-top: 5px;
-      padding: 8px;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 1rem;
-    }
-    .inline-group { display: flex; gap: 10px; align-items: center; }
-    button {
-      margin-top: 20px;
-      background: #ff9800;
-      border: none;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background: #ffb74d; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Form</title>
+  <script type="module" src="question.js" defer></script>
 </head>
-<body>
-
-  <h2>예상 비밀번호 생성을 위한 질문</h2>
-
-  <label>이름 (예: Min)</label><input type="text" id="firstName">
-  <label>성 (예: Kim)</label><input type="text" id="lastName">
-  <label>생년월일</label><input type="date" id="birth">
-  <label>전화번호</label><input type="text" id="phone">
-
-  <label>집전화번호</label>
-  <div class="inline-group">
-    <input type="text" id="homePhone">
-    <label><input type="checkbox" id="noHomePhone"> 없음</label>
-  </div>
-
-  <label>별명</label><input type="text" id="nickname">
-
-  <label>반려동물 이름 (쉼표로 구분)</label>
-  <div class="inline-group">
-    <input type="text" id="petNames">
-    <label><input type="checkbox" id="noPet"> 없음</label>
-  </div>
-
-  <label>자주 사용하는 숫자들 (쉼표로 구분)</label><input type="text" id="favNums">
-  <label>특수문자 (쉼표로 구분)</label><input type="text" id="specialChars">
-
-  <label>비밀번호에 이름을 포함합니까?</label>
-  <select id="includeName"><option value="yes">예</option><option value="no">아니오</option></select>
-
-  <label>문자 치환을 사용합니까? (S → $ 등)</label>
-  <select id="useLeet"><option value="yes">예</option><option value="no">아니오</option></select>
-
-  <button onclick="exportUserInfoJSON()">정보 저장 (user_info.json)</button>
-
-  <script src="prepare_data.js"></script>
-
-</body>
+<body></body>
 </html>
